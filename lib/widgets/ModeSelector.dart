@@ -3,19 +3,21 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:animated_toggle_switch/animated_toggle_switch.dart';
 
 class ModeSelector extends StatefulWidget {
-  const ModeSelector({super.key});
+  const ModeSelector({super.key, required this.mode, required this.modeChanged});
+
+  final bool mode;
+  final Function(bool) modeChanged;
 
   @override
   State<ModeSelector> createState() => _ModeSelectorState();
 }
 
 class _ModeSelectorState extends State<ModeSelector> {
-  bool ModeState = true;
 
   @override
   Widget build(BuildContext context) {
     return AnimatedToggleSwitch<bool>.dual(
-      current: ModeState,
+      current: widget.mode,
       first: true,
       second: false,
       spacing: 30.0,  // 토글 간 간격
@@ -44,7 +46,7 @@ class _ModeSelectorState extends State<ModeSelector> {
         );
       },
 
-      onChanged: (value) => setState(() => ModeState = value),
+      onChanged: (value) => widget.modeChanged(value),
     );
   }
 }
