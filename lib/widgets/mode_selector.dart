@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:animated_toggle_switch/animated_toggle_switch.dart';
 
 class ModeSelector extends StatefulWidget {

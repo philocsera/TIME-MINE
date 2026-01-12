@@ -1,0 +1,1 @@
+DateTime startOfDay(DateTime now) => DateTime(now.year, now.month, now.day);

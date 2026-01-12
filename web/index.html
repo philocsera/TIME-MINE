@@ -31,6 +31,14 @@
 
   <title>time_chunking</title>
   <link rel="manifest" href="manifest.json">
+
+  <!-- WebAssembly MIME type 설정 -->
+  <script>
+    // WebAssembly 파일의 MIME 타입을 올바르게 설정
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('flutter_service_worker.js');
+    }
+  </script>
 </head>
 <body>
   <script src="flutter_bootstrap.js" async></script>

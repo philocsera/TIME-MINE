@@ -53,7 +53,7 @@ class _PlayButtonState extends State<PlayButton> {
           scale: _pressed ? 0.9 : 1.0,
           child: FittedBox(
             fit: BoxFit.contain,
-            child: Image.asset(!widget.timerStarted ? '../assets/play_button.png' : '../assets/pause_button.png', color: widget.mode ? Colors.red : Colors.blue),
+            child: Image.asset(!widget.timerStarted ? 'assets/play_button.png' : 'assets/pause_button.png', color: widget.mode ? Colors.red : Colors.blue),
           )
         )
       )
