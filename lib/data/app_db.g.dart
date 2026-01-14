@@ -52,6 +52,19 @@ class $SessionsTable extends Sessions with TableInfo<$SessionsTable, Session> {
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _modeMeta = const VerificationMeta('mode');
+  @override
+  late final GeneratedColumn<bool> mode = GeneratedColumn<bool>(
+    'mode',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("mode" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   static const VerificationMeta _durationSecMeta = const VerificationMeta(
     'durationSec',
   );
@@ -70,6 +83,7 @@ class $SessionsTable extends Sessions with TableInfo<$SessionsTable, Session> {
     taskName,
     startAt,
     endAt,
+    mode,
     durationSec,
   ];
   @override
@@ -111,6 +125,12 @@ class $SessionsTable extends Sessions with TableInfo<$SessionsTable, Session> {
     } else if (isInserting) {
       context.missing(_endAtMeta);
     }
+    if (data.containsKey('mode')) {
+      context.handle(
+        _modeMeta,
+        mode.isAcceptableOrUnknown(data['mode']!, _modeMeta),
+      );
+    }
     if (data.containsKey('duration_sec')) {
       context.handle(
         _durationSecMeta,
@@ -145,6 +165,10 @@ class $SessionsTable extends Sessions with TableInfo<$SessionsTable, Session> {
         DriftSqlType.dateTime,
         data['${effectivePrefix}end_at'],
       )!,
+      mode: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}mode'],
+      )!,
       durationSec: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}duration_sec'],
@@ -163,12 +187,14 @@ class Session extends DataClass implements Insertable<Session> {
   final String taskName;
   final DateTime startAt;
   final DateTime endAt;
+  final bool mode;
   final int durationSec;
   const Session({
     required this.id,
     required this.taskName,
     required this.startAt,
     required this.endAt,
+    required this.mode,
     required this.durationSec,
   });
   @override
@@ -178,6 +204,7 @@ class Session extends DataClass implements Insertable<Session> {
     map['task_name'] = Variable<String>(taskName);
     map['start_at'] = Variable<DateTime>(startAt);
     map['end_at'] = Variable<DateTime>(endAt);
+    map['mode'] = Variable<bool>(mode);
     map['duration_sec'] = Variable<int>(durationSec);
     return map;
   }
@@ -188,6 +215,7 @@ class Session extends DataClass implements Insertable<Session> {
       taskName: Value(taskName),
       startAt: Value(startAt),
       endAt: Value(endAt),
+      mode: Value(mode),
       durationSec: Value(durationSec),
     );
   }
@@ -202,6 +230,7 @@ class Session extends DataClass implements Insertable<Session> {
       taskName: serializer.fromJson<String>(json['taskName']),
       startAt: serializer.fromJson<DateTime>(json['startAt']),
       endAt: serializer.fromJson<DateTime>(json['endAt']),
+      mode: serializer.fromJson<bool>(json['mode']),
       durationSec: serializer.fromJson<int>(json['durationSec']),
     );
   }
@@ -213,6 +242,7 @@ class Session extends DataClass implements Insertable<Session> {
       'taskName': serializer.toJson<String>(taskName),
       'startAt': serializer.toJson<DateTime>(startAt),
       'endAt': serializer.toJson<DateTime>(endAt),
+      'mode': serializer.toJson<bool>(mode),
       'durationSec': serializer.toJson<int>(durationSec),
     };
   }
@@ -222,12 +252,14 @@ class Session extends DataClass implements Insertable<Session> {
     String? taskName,
     DateTime? startAt,
     DateTime? endAt,
+    bool? mode,
     int? durationSec,
   }) => Session(
     id: id ?? this.id,
     taskName: taskName ?? this.taskName,
     startAt: startAt ?? this.startAt,
     endAt: endAt ?? this.endAt,
+    mode: mode ?? this.mode,
     durationSec: durationSec ?? this.durationSec,
   );
   Session copyWithCompanion(SessionsCompanion data) {
@@ -236,6 +268,7 @@ class Session extends DataClass implements Insertable<Session> {
       taskName: data.taskName.present ? data.taskName.value : this.taskName,
       startAt: data.startAt.present ? data.startAt.value : this.startAt,
       endAt: data.endAt.present ? data.endAt.value : this.endAt,
+      mode: data.mode.present ? data.mode.value : this.mode,
       durationSec: data.durationSec.present
           ? data.durationSec.value
           : this.durationSec,
@@ -249,13 +282,15 @@ class Session extends DataClass implements Insertable<Session> {
           ..write('taskName: $taskName, ')
           ..write('startAt: $startAt, ')
           ..write('endAt: $endAt, ')
+          ..write('mode: $mode, ')
           ..write('durationSec: $durationSec')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, taskName, startAt, endAt, durationSec);
+  int get hashCode =>
+      Object.hash(id, taskName, startAt, endAt, mode, durationSec);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -264,6 +299,7 @@ class Session extends DataClass implements Insertable<Session> {
           other.taskName == this.taskName &&
           other.startAt == this.startAt &&
           other.endAt == this.endAt &&
+          other.mode == this.mode &&
           other.durationSec == this.durationSec);
 }
 
@@ -272,12 +308,14 @@ class SessionsCompanion extends UpdateCompanion<Session> {
   final Value<String> taskName;
   final Value<DateTime> startAt;
   final Value<DateTime> endAt;
+  final Value<bool> mode;
   final Value<int> durationSec;
   const SessionsCompanion({
     this.id = const Value.absent(),
     this.taskName = const Value.absent(),
     this.startAt = const Value.absent(),
     this.endAt = const Value.absent(),
+    this.mode = const Value.absent(),
     this.durationSec = const Value.absent(),
   });
   SessionsCompanion.insert({
@@ -285,6 +323,7 @@ class SessionsCompanion extends UpdateCompanion<Session> {
     required String taskName,
     required DateTime startAt,
     required DateTime endAt,
+    this.mode = const Value.absent(),
     this.durationSec = const Value.absent(),
   }) : taskName = Value(taskName),
        startAt = Value(startAt),
@@ -294,6 +333,7 @@ class SessionsCompanion extends UpdateCompanion<Session> {
     Expression<String>? taskName,
     Expression<DateTime>? startAt,
     Expression<DateTime>? endAt,
+    Expression<bool>? mode,
     Expression<int>? durationSec,
   }) {
     return RawValuesInsertable({
@@ -301,6 +341,7 @@ class SessionsCompanion extends UpdateCompanion<Session> {
       if (taskName != null) 'task_name': taskName,
       if (startAt != null) 'start_at': startAt,
       if (endAt != null) 'end_at': endAt,
+      if (mode != null) 'mode': mode,
       if (durationSec != null) 'duration_sec': durationSec,
     });
   }
@@ -310,6 +351,7 @@ class SessionsCompanion extends UpdateCompanion<Session> {
     Value<String>? taskName,
     Value<DateTime>? startAt,
     Value<DateTime>? endAt,
+    Value<bool>? mode,
     Value<int>? durationSec,
   }) {
     return SessionsCompanion(
@@ -317,6 +359,7 @@ class SessionsCompanion extends UpdateCompanion<Session> {
       taskName: taskName ?? this.taskName,
       startAt: startAt ?? this.startAt,
       endAt: endAt ?? this.endAt,
+      mode: mode ?? this.mode,
       durationSec: durationSec ?? this.durationSec,
     );
   }
@@ -336,6 +379,9 @@ class SessionsCompanion extends UpdateCompanion<Session> {
     if (endAt.present) {
       map['end_at'] = Variable<DateTime>(endAt.value);
     }
+    if (mode.present) {
+      map['mode'] = Variable<bool>(mode.value);
+    }
     if (durationSec.present) {
       map['duration_sec'] = Variable<int>(durationSec.value);
     }
@@ -349,6 +395,7 @@ class SessionsCompanion extends UpdateCompanion<Session> {
           ..write('taskName: $taskName, ')
           ..write('startAt: $startAt, ')
           ..write('endAt: $endAt, ')
+          ..write('mode: $mode, ')
           ..write('durationSec: $durationSec')
           ..write(')'))
         .toString();
@@ -372,6 +419,7 @@ typedef $$SessionsTableCreateCompanionBuilder =
       required String taskName,
       required DateTime startAt,
       required DateTime endAt,
+      Value<bool> mode,
       Value<int> durationSec,
     });
 typedef $$SessionsTableUpdateCompanionBuilder =
@@ -380,6 +428,7 @@ typedef $$SessionsTableUpdateCompanionBuilder =
       Value<String> taskName,
       Value<DateTime> startAt,
       Value<DateTime> endAt,
+      Value<bool> mode,
       Value<int> durationSec,
     });
 
@@ -408,6 +457,11 @@ class $$SessionsTableFilterComposer extends Composer<_$AppDB, $SessionsTable> {
 
   ColumnFilters<DateTime> get endAt => $composableBuilder(
     column: $table.endAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get mode => $composableBuilder(
+    column: $table.mode,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -446,6 +500,11 @@ class $$SessionsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<bool> get mode => $composableBuilder(
+    column: $table.mode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get durationSec => $composableBuilder(
     column: $table.durationSec,
     builder: (column) => ColumnOrderings(column),
@@ -472,6 +531,9 @@ class $$SessionsTableAnnotationComposer
 
   GeneratedColumn<DateTime> get endAt =>
       $composableBuilder(column: $table.endAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get mode =>
+      $composableBuilder(column: $table.mode, builder: (column) => column);
 
   GeneratedColumn<int> get durationSec => $composableBuilder(
     column: $table.durationSec,
@@ -511,12 +573,14 @@ class $$SessionsTableTableManager
                 Value<String> taskName = const Value.absent(),
                 Value<DateTime> startAt = const Value.absent(),
                 Value<DateTime> endAt = const Value.absent(),
+                Value<bool> mode = const Value.absent(),
                 Value<int> durationSec = const Value.absent(),
               }) => SessionsCompanion(
                 id: id,
                 taskName: taskName,
                 startAt: startAt,
                 endAt: endAt,
+                mode: mode,
                 durationSec: durationSec,
               ),
           createCompanionCallback:
@@ -525,12 +589,14 @@ class $$SessionsTableTableManager
                 required String taskName,
                 required DateTime startAt,
                 required DateTime endAt,
+                Value<bool> mode = const Value.absent(),
                 Value<int> durationSec = const Value.absent(),
               }) => SessionsCompanion.insert(
                 id: id,
                 taskName: taskName,
                 startAt: startAt,
                 endAt: endAt,
+                mode: mode,
                 durationSec: durationSec,
               ),
           withReferenceMapper: (p0) => p0

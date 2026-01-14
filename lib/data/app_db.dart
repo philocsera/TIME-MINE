@@ -36,4 +36,6 @@ class AppDB extends _$AppDB {
       totalDurationSec: totalDur,
     );
   }
+
+  Future<void> clearAll() async => await delete(sessions).go();
 }

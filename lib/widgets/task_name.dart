@@ -7,37 +7,36 @@ class Taskname extends StatefulWidget {
   final Function(String) onNameChanged;
 
   @override
-  _TasknameState createState() => _TasknameState();
+  TasknameState createState() => TasknameState();
 }
 
-class _TasknameState extends State<Taskname> {
+class TasknameState extends State<Taskname> {
   List<String> titles = ['Youtube', 'Novel'];
   String? selectedTitle;
-  TextEditingController _controller = TextEditingController();
+  final TextEditingController _controller = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-        width: MediaQuery.of(context).size.width * 0.3,
+        width: MediaQuery.of(context).size.width * 0.6,
         child : DropdownButtonFormField<String>(
-        value: selectedTitle,
-        isExpanded: true,
-        dropdownColor: Colors.black,
-        alignment: Alignment.center,
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: 24,
-        ),
-        items: [
-          ...titles.map((t) => DropdownMenuItem(
-            value: t, 
-            child: SizedBox(
-              width: double.infinity,
-              child: Center(
-                child: Text(t),
-              ),
-            )
-          )),
+          isExpanded: true,
+          dropdownColor: Colors.black,
+          alignment: Alignment.center,
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 24,
+          ),
+          items: [
+            ...titles.map((t) => DropdownMenuItem(
+              value: t, 
+              child: SizedBox(
+                width: double.infinity,
+                child: Center(
+                  child: Text(t),
+                ),
+              )
+            )),
           const DropdownMenuItem(
             value: 'add_new', 
             child: SizedBox(

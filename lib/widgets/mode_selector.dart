@@ -15,37 +15,42 @@ class _ModeSelectorState extends State<ModeSelector> {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedToggleSwitch<bool>.dual(
-      current: widget.mode,
-      first: true,
-      second: false,
-      spacing: 30.0,  // 토글 간 간격
+    return SizedBox(
+      width: MediaQuery.of(context).size.width*0.7,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Expanded(flex: 20, child: Image.asset('assets/sword.png', color: widget.mode ? Colors.red : Colors.white)),
+          Spacer(flex: 5),
+          Expanded(flex: 50, child: AnimatedToggleSwitch<bool>.dual(
+            current: widget.mode,
+            first: true,
+            second: false,
+            spacing: 30.0,  // 토글 간 간격r
 
-      // 기본 스타일
-      style: const ToggleStyle(
-        backgroundColor: Colors.transparent, // 전체 배경
-        indicatorBorder: Border.fromBorderSide(BorderSide(color: Colors.white)),
-        borderRadius: BorderRadius.all(Radius.circular(30)),
+            // 기본 스타일
+            style: const ToggleStyle(
+              backgroundColor: Colors.transparent, // 전체 배경
+              indicatorBorder: Border.fromBorderSide(BorderSide(color: Colors.white)),
+              borderRadius: BorderRadius.all(Radius.circular(30)),
+            ),
+
+            // 선택 상태별 스타일 변경 가능
+            styleBuilder: (bool value) {
+              return ToggleStyle(
+                indicatorColor: Colors.white,
+              );
+            },
+
+            // 왼/오 토글에 아이콘 넣기
+
+            onChanged: (value) => widget.modeChanged(value),
+          )),
+          Spacer(flex: 5),
+          Expanded(flex: 20, child: Image.asset('assets/shield.png', color: !widget.mode ? Color(0xFF3B82F6) : Colors.white)),
+        ],
       ),
-
-      // 선택 상태별 스타일 변경 가능
-      styleBuilder: (bool value) {
-        return ToggleStyle(
-          indicatorColor: value ? Colors.red : Colors.blue,
-        );
-      },
-
-      // 왼/오 토글에 아이콘 넣기
-      iconBuilder: (bool value) {
-        return Image.asset(
-          value ? 'assets/sword.png' : 'assets/shield.png',
-          width: 30,
-          height: 30,
-          fit: BoxFit.contain,
-        );
-      },
-
-      onChanged: (value) => widget.modeChanged(value),
     );
   }
 }
+

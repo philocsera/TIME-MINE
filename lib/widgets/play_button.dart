@@ -47,15 +47,28 @@ class _PlayButtonState extends State<PlayButton> {
           shadowColor: Colors.transparent,
           surfaceTintColor: Colors.transparent,
           elevation: 0,
-          fixedSize: const Size(400, 400), 
+          fixedSize: widget.timerStarted ? const Size(250, 250) : const Size(300, 300),
         ).copyWith(overlayColor: WidgetStateProperty.all(Colors.transparent)),
         child: Transform.scale(
           scale: _pressed ? 0.9 : 1.0,
-          child: FittedBox(
-            fit: BoxFit.contain,
-            child: Image.asset(!widget.timerStarted ? 'assets/play_button.png' : 'assets/pause_button.png', color: widget.mode ? Colors.red : Colors.blue),
-          )
-        )
+          child: TweenAnimationBuilder<Color?>(
+            tween: ColorTween(
+              end: widget.mode ? Colors.red : Color(0xFF3B82F6),
+            ),
+            duration: const Duration(milliseconds: 500),
+            builder: (context, color, _) {
+              return FittedBox(
+                fit: BoxFit.contain,
+                child: Image.asset(
+                  !widget.timerStarted
+                      ? 'assets/play_button.png'
+                      : 'assets/pause_button.png',
+                  color: color,
+                ),
+              );
+            },
+          ),
+        ),
       )
     );
   }

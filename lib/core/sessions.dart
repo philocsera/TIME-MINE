@@ -5,6 +5,7 @@ class Sessions extends Table {
   TextColumn get taskName => text()();
   DateTimeColumn get startAt => dateTime()();
   DateTimeColumn get endAt => dateTime()();
+  BoolColumn get mode => boolean().withDefault(const Constant(false))();
   
   IntColumn get durationSec => integer().withDefault(const Constant(0))();
 }

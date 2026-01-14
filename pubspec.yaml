@@ -30,6 +30,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  timeline_tile: ^2.0.0
+  flutter_timeline: ^0.3.0
   animated_toggle_switch: ^0.8.5
   provider: ^6.1.0
   cupertino_icons: ^1.0.8

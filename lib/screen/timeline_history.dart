@@ -41,7 +41,7 @@ class TimelineHistoryState extends State<TimelineHistory> {
         ),
         Expanded(
           flex: 8,
-          child: Timeline(targetDate: target)
+          child: TimelinePage(targetDate: target)
         ),
       ]
     );;
