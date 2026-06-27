@@ -42,7 +42,7 @@ class _PlayButtonState extends State<PlayButton> {
 
   @override
   Widget build(BuildContext context) {
-    final Color iconColor = widget.mode ? Colors.red : const Color(0xFF3B82F6);
+    final Color iconColor = Colors.white; //const Color(0xFF3B82F6);
     final String assetPath =
         widget.mode ? 'assets/sword.png' : 'assets/shield.png';
 

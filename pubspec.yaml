@@ -30,16 +30,15 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  timeline_tile: ^2.0.0
-  flutter_timeline: ^0.3.0
+  shared_preferences: ^2.3.2  
   animated_toggle_switch: ^0.8.5
   provider: ^6.1.0
-  cupertino_icons: ^1.0.8
   drift: ^2.30.0
   sqlite3_flutter_libs: ^0.5.0
   path_provider: ^2.1.0
   path: ^1.9.0
   intl: ^0.19.0
+  wakelock_plus: ^1.2.8
 
 dev_dependencies:
   flutter_test:
@@ -68,7 +67,15 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/
-
+  fonts:
+    - family: VITRO_CORE
+      fonts:
+        - asset: assets/fonts/VITRO CORE TTF.ttf
+          weight: 400
+    - family: VITRO_PRIDE
+      fonts:
+        - asset: assets/fonts/VITRO PRIDE TTF.ttf
+          weight: 400
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
 

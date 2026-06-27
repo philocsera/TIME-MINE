@@ -1,87 +1,4 @@
-import 'package:flutter/material.dart';
-
-class Taskname extends StatefulWidget {
-  const Taskname({
-    super.key,
-    required this.mode,
-    required this.onNameChanged,
-    required this.titles,
-  });
-
-  final bool mode;
-  final Function(String) onNameChanged;
-  final List<String> titles;
-
-  @override
-  TasknameState createState() => TasknameState();
-}
-
-class TasknameState extends State<Taskname> {
-  String? selectedTitle;
-
-  @override
-  Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width * 0.6;
-
-    return SizedBox(
-      width: width,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(14),
-        onTap: () async {
-          final picked = await Navigator.push<String>(
-            context,
-            MaterialPageRoute(
-              builder: (_) => TitlePickerPage(
-                mode: widget.mode,
-                titles: widget.titles,
-                initialSelected: selectedTitle,
-              ),
-            ),
-          );
-
-          if (picked == null) return;
-
-          setState(() => selectedTitle = picked);
-          widget.onNameChanged(picked);
-        },
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: Colors.white),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.label_outline,
-                color: Colors.white,
-                size: 18,
-              ),
-              const SizedBox(width: 10),
-              Flexible(
-                child: Text(
-                  selectedTitle ?? 'Select Title',
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 22,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Icon(
-                Icons.chevron_right,
-                color: Colors.white,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
+import 'package:timemine/core/core.dart';
 
 class TitlePickerPage extends StatefulWidget {
   const TitlePickerPage({
@@ -92,7 +9,7 @@ class TitlePickerPage extends StatefulWidget {
   });
 
   final bool mode;
-  final List<String> titles;
+  final List<String> titles; // 부모에서 받은 "원본 리스트" (공유됨)
   final String? initialSelected;
 
   @override
@@ -154,9 +71,9 @@ class _TitlePickerPageState extends State<TitlePickerPage> {
                 decoration: InputDecoration(
                   prefixIcon: const Icon(Icons.search, color: Colors.white),
                   hintText: 'Search title',
-                  hintStyle: TextStyle(color: Colors.white.withOpacity(0.4)),
+                  hintStyle: TextStyle(color: Colors.white54),
                   filled: true,
-                  fillColor: Colors.white.withOpacity(0.06),
+                  fillColor: Colors.white12,
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(14),
                     borderSide: BorderSide(color: Colors.white.withOpacity(0.18)),
@@ -170,7 +87,7 @@ class _TitlePickerPageState extends State<TitlePickerPage> {
             ),
             Expanded(
               child: ListView.separated(
-                itemCount: _filteredTitles.length + 1, // + "Add new" row
+                itemCount: _filteredTitles.length + 1, // + Add new row
                 separatorBuilder: (_, __) =>
                     Divider(color: Colors.white.withOpacity(0.10), height: 1),
                 itemBuilder: (context, index) {
@@ -194,9 +111,25 @@ class _TitlePickerPageState extends State<TitlePickerPage> {
                       t,
                       style: const TextStyle(color: Colors.white, fontSize: 18),
                     ),
-                    trailing: isSelected
-                        ? const Icon(Icons.check, color: Colors.white)
-                        : null,
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (isSelected)
+                          const Padding(
+                            padding: EdgeInsets.only(right: 6),
+                            child: Icon(Icons.check, color: Colors.white),
+                          ),
+                        IconButton(
+                          tooltip: 'Delete',
+                          icon: Icon(
+                            Icons.delete_outline,
+                            color: Colors.white.withOpacity(0.85),
+                          ),
+                          onPressed: () => _confirmDelete(context, t),
+                        ),
+                      ],
+                    ),
+                    // ✅ 선택했을 때만 페이지 닫고 타이머로 돌아감
                     onTap: () => Navigator.pop(context, t),
                   );
                 },
@@ -222,14 +155,9 @@ class _TitlePickerPageState extends State<TitlePickerPage> {
           style: const TextStyle(color: Colors.white),
           decoration: InputDecoration(
             hintText: 'Type title',
-            hintStyle: TextStyle(color: Colors.white.withOpacity(0.4)),
-            enabledBorder: UnderlineInputBorder(
-              borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
-            ),
-            focusedBorder: const UnderlineInputBorder(
-              borderSide: BorderSide(color: Colors.white),
-            ),
+            hintStyle: TextStyle(color: Colors.white54),
           ),
+          onSubmitted: (_) => Navigator.pop(ctx, _addController.text),
         ),
         actions: [
           TextButton(
@@ -237,14 +165,7 @@ class _TitlePickerPageState extends State<TitlePickerPage> {
             child: const Text('Cancel'),
           ),
           ElevatedButton(
-            onPressed: () {
-              final text = _addController.text.trim();
-              if (text.isEmpty) {
-                Navigator.pop(ctx);
-                return;
-              }
-              Navigator.pop(ctx, text);
-            },
+            onPressed: () => Navigator.pop(ctx, _addController.text),
             child: const Text('Add'),
           ),
         ],
@@ -252,20 +173,62 @@ class _TitlePickerPageState extends State<TitlePickerPage> {
     );
 
     if (result == null) return;
-
     final newTitle = result.trim();
     if (newTitle.isEmpty) return;
 
-    // ✅ 중요한 포인트:
-    // widget.titles는 "부모로부터 받은 List"라서 여기서 add 하면 원본 리스트가 같이 바뀜.
-    // (TasknameState의 titles 리스트를 그대로 넘겨주고 있어서)
+    // ✅ 1) DB에 저장 (중복은 insertOrIgnore라 안전)
+    final db = context.read<AppDB>();
+    await db.addTitle(widget.mode ? 'attack' : 'defense', newTitle);
+
+    // ✅ 2) UI 목록도 갱신: (A) 메모리 추가 or (B) DB에서 재로드
     if (!widget.titles.contains(newTitle)) {
       widget.titles.add(newTitle);
     }
 
-    // 추가하면 바로 선택해서 돌아가기
-    if (mounted) {
-      Navigator.pop(context, newTitle);
+    if (!mounted) return;
+    setState(() {});
+  }
+
+
+  Future<void> _confirmDelete(BuildContext context, String title) async {
+    final bool? ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: Colors.black,
+        title: const Text('Delete title?', style: TextStyle(color: Colors.white)),
+        content: Text(
+          '"$title" will be removed.',
+          style: TextStyle(color: Colors.white54),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (ok != true) return;
+
+    // ✅ 1) DB에서도 삭제
+    final db = context.read<AppDB>();
+    final type = widget.mode ? 'attack' : 'defense'; // 너 구조에 맞게 type 가져오면 됨
+    await db.deleteTitle(type, title);
+
+    // ✅ 2) UI 목록에서도 제거 (즉시 반영)
+    widget.titles.remove(title);
+
+    if (!mounted) return;
+    setState(() {});
+
+    // ✅ 3) 선택된 걸 삭제했다면 선택 해제 + 닫기
+    if (title == widget.initialSelected) {
+      Navigator.pop(context, null);
     }
   }
 }
